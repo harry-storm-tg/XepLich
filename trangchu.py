@@ -5,7 +5,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pathlib
 
-
 @st.cache_data(ttl=3600)
 def load_credentials():
     creds_info = {
@@ -64,6 +63,7 @@ def login():
                 st.session_state["username"] = name
                 st.session_state["auth"] = author
                 st.session_state["specialist"] = specialist
+                st.session_state["ma_nhan_su"] = data["MÃ NHÂN SỰ"][int(index-1)]
                 st.rerun()
         if found != 1:
             st.warning("Please recheck your username or password")
