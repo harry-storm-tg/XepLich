@@ -1,0 +1,593 @@
+
+.st-key-green button {
+    background-color: green;
+}
+
+/* Animated button with pulse effect */
+.st-key-pulse button {
+    background-color: #4CAF50;
+    border-radius: 10px;
+    padding: 20px 60px;
+    animation: pulse 2s infinite;
+}
+
+.st-key-pulse button p {
+    font-size: 24px;
+    font-family: 'Futura', 'Trebuchet MS', Arial, sans-serif;
+}
+
+/* Hover effect for the button */
+.st-key-pulse button:hover {
+    background-color: #45a049; /* Darker green */
+    border: none;
+}
+
+.st-key-pulse button:hover p {
+    color: #FFD700; /* Gold color */
+}
+
+/* Override the focus states to prevent default red border */
+.st-key-pulse button:focus {
+    background-color: #45a049; /* Keep the same as hover */
+    border: none;
+}
+
+/* Apply the same text color during focus states */
+.st-key-pulse button:focus p {
+    color: #FFD700;
+}
+
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+/* Text input with custom font and color */
+.st-key-styledinput input {
+    border: 5px solid #3cff1e;
+    border-radius: 8px;
+}
+
+.st-key-styledinput input:focus {
+    border: none;
+}
+
+
+/* Text area with custom font */
+.st-key-styledtextarea textarea {
+    background-color: #e6e6fa;
+    border: 4px solid #9370DB;
+    border-radius: 8px;
+    font-family: 'Lucida Handwriting', cursive;
+    color: #4B0082;
+}
+
+
+/* Radio buttons with custom styles */
+.st-key-styleradio .stRadio p {
+    color: #3d2e8b;
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 24px;
+}
+/* Tự làm*/
+
+.st-key-yc form {
+    background-color: green;
+}
+
+.tieude {
+    text-align: center;
+    font-family: "Source Sans Pro", sans-serif;
+    color: #013e55;
+    font-size: 45px;
+}
+
+.demuc {
+    text-align: left;
+    font-family: "Source Sans Pro", sans-serif;
+    color:#3a06f4;
+    font-size: 20px;
+    margin-bottom: 1px;
+    margin-top: 10px;
+
+}
+
+.ttcn {
+    text-align: left;
+    color:#00505b;
+    font-size: 18px;
+    margin-bottom: 1px;
+    margin-top: 10px;
+}
+
+.admin_1 {
+    text-align: left;
+    font-family: 'Calibri', cursive;
+    color:#19ba00;
+    font-size: 20px;
+    margin-bottom: 0px;
+}
+
+
+.muc {
+    text-align: left;
+    font-family: "Source Sans Pro", sans-serif;
+    color:#000000;
+    font-size: 60px;
+    margin-bottom: -10px;
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    padding-top: 10px;
+    left: 5;
+    width: 100%;
+    background-color: white;
+    flex-direction: column;
+    z-index: 1000;
+    display: flex;
+    align-items: left;
+}
+.bangtt {
+    border: 2px solid #9F2B68; 
+    border-radius: 10px; 
+    padding: 20px; 
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    padding-bottom: 0px;
+}
+
+.header-underline {
+    position: fixed;
+    border-bottom: 2px solid #00697d;
+    width: 55%;
+    display: flex;
+    z-index: 1001;
+    top: 4.5rem;
+}
+
+.header-content img {
+    height: 1.6rem;
+    max-width: 100%;
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.header-text p {
+    font-size: 25px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.header-text h1 {
+    font-size: 11px;
+    line-height: 1;
+    color: #03335c; 
+    font-family: "Source Sans Pro", sans-serif;
+    padding-bottom: 0%;
+    padding-top:0.2rem;
+}
+
+.header-subtext {
+    margin-top: 0px;
+    text-align: left;
+}
+.header-subtext p {
+    font-size: 1rem;
+    color: #e60d0de9;
+    font-family: "Source Sans Pro", sans-serif;
+    font-weight: bold;
+    padding-left: 20px;
+    margin-bottom: 2px;
+    border-bottom: #000000;
+}
+
+.login-header {
+    display: flex;            
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.logo-img {
+    height: 60px;            
+    width: auto;              
+}
+.login-header-text h4 {
+    margin-top: 5px;               
+    line-height: 1.2;
+    color:#2c25b3;
+}
+    /* PCCS nè */
+.subtitle-pccs {
+    font-size: 16px;
+    color: #006d8b;
+    font-weight: bold;
+    font-family: "Source Sans Pro", sans-serif;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+.button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    }
+
+/* Adjust main content to prevent *button* overlap - PCCS*/
+[data-testid="stAppViewContainer"] > div:nth-child(1) {
+    padding-bottom: 80px;
+}
+
+/* Center save *button* container */
+.button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 100;
+    width: 100%;
+}
+
+/* Style for save *button* */
+.button-container [data-testid="baseButton-secondary"] {
+    margin: 0 auto;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+/* Adjust main content area to prevent *button* overlap */
+[data-testid="stAppViewContainer"] > div:nth-child(1) {
+    padding-bottom: 80px;
+}
+
+
+@media screen and (max-width: 780px) {
+    .fixed-header {
+            padding-left: 10px;
+            left: 15px;
+    }
+    .header-underline {
+            width: 90%;
+    }
+    .login-header-text h4 {
+        padding-bottom: 0px;
+        margin-top: 5px;
+        padding-top: 0px;          
+        line-height: 1.2;
+        font-size: 12px;
+        color:#2c25b3;
+    }
+    .logo-img {
+        height: 33px;
+        width: auto;
+    }
+
+    [data-testid="stBaseButton-header"] {
+        right: 10px !important;
+        top: 8px;
+    }   
+
+    .header-subtext p {
+        font-size: 1rem;
+        color: #e60d0de9;
+        font-family: "Source Sans Pro", sans-serif;
+        font-weight: bold;
+        padding-left: 20px;
+        margin-bottom: 2px;
+        border-bottom: #000000;
+    }
+    .demuc {
+        text-align: left;
+        font-family: "Source Sans Pro", sans-serif;
+        color:#3a06f4;
+        font-size: 18px;
+        margin-bottom: 1px;
+        margin-top: 10px;
+        
+        }
+
+    .subtitle-pccs {
+        font-size: 14px;
+        text-align: center;
+        font-weight: bold;
+        padding: 10px 0;
+        color: #006d8b;
+        background-color: #f5f5f5;
+        margin: 15px 0 10px 0;
+        width: 100%;
+        }
+        
+        /* Make columns stack vertically-PCCS */
+    [data-testid="column"] {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+    }
+
+    /* Center inputs - PCCS*/
+    [data-testid="stNumberInput"] {
+        margin: 0 auto;
+        max-width: 150px;
+    }
+        /* Style labels in mobile view -PCCS*/
+    [data-testid="stNumberInput"] label p {
+        text-align: center !important;
+        font-weight: bold;
+        font-size: 13px;
+        color: #005259;
+        margin-bottom: 5px;
+    }
+
+    /* Add spacing between shift groups -PCCS*/
+    [data-testid="stVerticalBlock"] > div {
+        margin-bottom: 20px;
+    }
+
+    /* Remove default margins that might interfere - PCCS*/
+    [data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+    }
+    .button-container {
+        bottom: 10px;
+        padding: 8px;
+    }
+    .button-container {
+        bottom: 10px;
+        padding: 10px;
+    }
+    
+    .button-container [data-testid="baseButton-secondary"] {
+        min-width: 150px;
+        max-width: 200px;
+    }
+
+    [class*="st-key-luu"] button {
+        padding: 8px 30px;
+        font-size: 18px;
+    }    
+}
+
+
+
+/* @media screen and (max-width: 480px) {
+    .demuc {
+            text-align: left;
+            font-family: "Source Sans Pro", sans-serif;
+            color:#3a06f4;
+            font-size: 17px;
+            margin-bottom: 1px;
+            margin-top: 10px;
+        
+        }
+    .header-subtext p {
+        padding-left: 0px;
+        font-size: 15px !important;
+        font-weight:bold;
+    }
+    [data-testid="stToolbar"] {
+        top: -50px !important
+    }
+}    */
+
+[data-testid="stRadio"] p {
+    font-size: 15px; 
+    color: #003b62; 
+    font-family: "Source Sans Pro", sans-serif;
+}
+[data-testid="stVerticalBlock"] {
+    gap: 0.5rem;
+}
+[data-baseweb="base-input"] {
+    background-color: #e7f1f8; 
+    border-style:hidden;
+}
+label[for^="text_input_"] div p {
+    font-size:15px;
+    color: rgb(59, 112, 114);
+    padding-left:20px;
+    width: 200px;
+    
+}
+[class*="st-key-co_so_"] label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-color: rgb(50, 189, 191) !important;
+    border-width: 2px !important;
+    border-style: solid !important;
+    border-radius: 10px !important;
+    background-color: #43f0d1;
+}
+[class*="st-key-co_so_"] input {
+    font-weight: bold !important;
+    background-color: #92d3de !important;
+    color:#000000 !important;
+    text-align: center !important;
+    border-color: rgb(2, 63, 65) !important;
+    border-width: 2px !important;
+    border-style: solid !important;
+    border-radius: 10px !important;
+}
+[class*="st-key-dang_su_dung_"] label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color:#0887c2;
+}
+[class*="st-key-trong_"] label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+[class*="st-key-hu_"] label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+[class*="st-key-muon_tu_khoa_khac_"] label {
+    display: none !important;
+}
+[class*="st-key-so_luong_muon_"] label {
+    display: none !important;
+}
+
+[class*="st-key-matkhau_login"] p{
+    padding-left: 0px !important;
+}
+[class*="LoginForm---ng-nh-p"] {
+    margin: auto;
+}
+[class*="LoginForm---ng-nh-p"] button {
+    width: 20rem;;
+}
+
+[class*="LoginForm-Qu-n-m-t-kh-u"] {
+    display: flex;
+    justify-content: flex-end;
+}
+
+div[role="dialog"] {
+    background-color: #ffffff;
+    border: 2px solid #0887c2;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+
+[data-testid="stBaseButton-secondary"] {
+    background-color: #ffffff;
+    color: black;
+}
+
+[data-testid="stDateInput"] p {
+    font-size:15px !important;
+    color: rgb(59, 112, 114) !important;
+}
+
+[data-testid="stWidgetLabel"] p {
+    font-size: 15px; 
+    color: #005259; 
+    font-family: "Source Sans Pro", sans-serif;
+    font-weight:bold;
+    justify-content: center;
+}
+
+.stRadio label:hover {
+    background-color: #e0e8ee;  
+    cursor: pointer;
+}
+[data-baseweb="select"] div div {
+    background-color: #e7f1f8;
+    align-content: flex-start !important;
+}
+
+[data-testid="stHeadingWithActionElements"] h3 {
+    color:#005259;
+    font-size:20px;
+    font-style: italic;
+}
+
+[data-baseweb="tab-list"] {
+    display: flex !important; 
+    justify-content: space-around;
+
+}
+
+[data-baseweb="tab-border"] {
+    width: 0;
+}
+
+[data-baseweb="tab-highlight"] {
+    background-color: #00515b;
+} 
+
+[data-testid="stHorizontalBlock"] {
+    gap:5px;
+}
+
+[data-testid="stHeadingWithActionElements"] h6 {
+    color: #005259;
+    padding-top:39px;
+    padding-bottom:0px;
+    font-weight:bold;
+}
+
+[data-testid="stToast"] {
+    top: 200px;
+    position: fixed;
+    display: flex;
+    background-color: #02b6b6;
+    color: #000000;
+}
+[data-testid="stHeader"] {
+    height: 0% !important;
+    background:#ffffff;
+    opacity: 0.05;
+    z-index: 1002;
+}
+[data-testid="stBaseButton-header"] div span {
+    visibility: hidden;
+    right:0px;
+}
+
+[data-testid="stMainBlockContainer"] {
+    padding-top: 3.7rem;
+    padding-left: 1rem;
+    padding-right: 2%;
+    padding-bottom: 2rem;
+}
+
+[class*="st-key-luu"] div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fixed-timer {
+        position: fixed;
+        top: 400px;
+        right: 20px;
+        z-index: 9999;
+        background-color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+.timer-text {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+    }
+.timer-red {
+        color: #ff4b4b;
+    }
+.timer-blue {
+        color: #1f77b4;
+    }
