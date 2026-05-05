@@ -83,7 +83,6 @@ CT = st.Page("pages/DK_CongTac.py", title="Đăng ký công tác", icon="🔸")
 VT = st.Page("pages/DS_ViTri.py", title="Danh sách vị trí", icon="🔸")
 P = st.Page("pages/DK_Phep.py", title="Đăng ký phép", icon="🔸")
 H = st.Page("pages/DK_Hoc.py", title="Đăng ký học", icon="🔸")
-
 DP = st.Page("reports/DuyetPhep.py", title="Duyệt phép", icon="🔸")
 LLV = st.Page("reports/LichLamViec.py", title="Xếp lịch làm việc", icon="🔸")
 PK = st.Page("pages/DK_Lich_PK.py", title="Đăng ký phòng khám", icon="🔸")

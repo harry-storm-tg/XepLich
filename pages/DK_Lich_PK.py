@@ -57,23 +57,32 @@ def send_to_gsheet(data_dict):
     current_row_count = len(sheet.get_all_values())
     flat_data = []
     timestamp = datetime.now(VN_TZ).strftime('%Y/%m/%d %H:%M:%S')
-    for i, (day, info) in enumerate(data_dict.items()):
+    for i, info in enumerate(data_dict):
         new_stt = current_row_count + i
-        flat_data.append([new_stt, timestamp, st.session_state.username, st.session_state.ma_nhan_su, info["Ngày"], info["Buổi"], info["Ghi chú"], info["Loại khám"]])
+        flat_data.append([new_stt, timestamp, info["Bác sĩ"], info["Mã nhân sự"], info["Ngày"], info["Loại"], info["Buổi"]])
     if flat_data:
         sheet.append_rows(flat_data)
     return True
 
-def ds_bs():
-    data = load_data(st.secrets["sheet_name"]["output_1"], "Trang tính1")
-    return data["HỌ VÀ TÊN BÁC SĨ"]
-
+def ds_bs(loai_pk):
+    data = load_data(st.secrets["sheet_name"]["input_2"], "Trang tính1")
+    data['ID'] = data['ID'].str[:6]
+    if loai_pk == st.secrets["PK"]["pk1"]:
+        PKTB = ["PK - S", "PK - C"]         
+        data = data[(data['VỊ TRÍ'].isin(PKTB))&(data['KHẢ NĂNG'] == "1")]
+    if loai_pk == st.secrets["PK"]["pk2"]:
+        data = data[(data['VỊ TRÍ'] == "NL")&(data['KHẢ NĂNG'] == "1")]
+    if loai_pk == st.secrets["PK"]["pk3"]:
+        data = data[(data['VỊ TRÍ'] == "QA")&(data['KHẢ NĂNG'] == "1")]
+    return data[['ID', 'TÊN']].drop_duplicates().to_dict('records')
 ###################################################################################################################
 st.set_page_config(layout="wide")
 st.title("🏥 Hệ thống Đăng ký Lịch phòng khám")
-
 col_week = st.columns(2)
 with col_week[0]:
+    ds_pk = list(st.secrets["PK"].values())
+    loai_pk = st.selectbox("Vị trí phòng khám", ds_pk, key="loai_pk_select")
+    ds_bs_pk = ds_bs(loai_pk)
     monday_of_week = st.date_input("Chọn ngày bất kì trong tuần cần đăng ký", value=datetime.now().date(),format="DD/MM/YYYY", key="date_input_pk")
     if monday_of_week.weekday() != 0:
         monday_of_week = monday_of_week - timedelta(days=monday_of_week.weekday())
@@ -82,29 +91,34 @@ with col_week[0]:
 st.write("### Bảng đăng ký lịch phòng khám (Tích chọn buổi đi khám)")
 cols = st.columns(6)
 days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
-loai_pk = st.secrets["PK"]["loai_pk"]
-lich_pk = {}
-chon_loai_pk = st.selectbox("Loại khám", loai_pk, key="loai_pk_select")
+data_to_sheets = [] 
 for i, day in enumerate(days):
     with cols[i]:
         st.write(f"**{day}**", "(", (monday_of_week + timedelta(days=i)).strftime('%d/%m/%Y'), ")")
         ngay_thang_nam = (monday_of_week + timedelta(days=i)).strftime('%d/%m/%Y')
-       
-        am = st.multiselect("Buổi sáng", ["7:00 - 9:00", "9:00 - 11:00"], key=f"{ngay_thang_nam}_am_pk")
-        pm = st.checkbox("Buổi chiều", key=f"{ngay_thang_nam}_pm_pk")
-        loai = st.selectbox("Loại khám", loai_pk, key=f"{ngay_thang_nam}_loai_pk")
-        ghi_chu = st.text_input(f"Ghi chú", key=f"{ngay_thang_nam}_note_pk")
-        if am and pm:
-            buoi = "Cả ngày"
-        elif am and not pm:
-            buoi = "Buổi sáng"
-        elif not am and pm:
-            buoi = "Buổi chiều"
-        else:
-            buoi = "Không đi khám"
-            continue
-        lich_pk[day] = {"Ngày": ngay_thang_nam, "Buổi": buoi,  "Loại khám": loai, "Ghi chú": ghi_chu}
+        ds_bs_sang = st.multiselect("Buổi sáng", options=ds_bs_pk, 
+                        format_func=lambda x: x['TÊN'], key=f"{ngay_thang_nam}_bs_pk_s")
+        ds_bs_chieu = st.multiselect("Buổi chiều", options=ds_bs_pk, 
+                        format_func=lambda x: x['TÊN'], key=f"{ngay_thang_nam}_bs_pk_c")
+        for bs in ds_bs_sang:
+            data_to_sheets.append({
+                "Ngày": ngay_thang_nam,
+                "Thứ": day,
+                "Bác sĩ": bs['TÊN'],
+                "Mã nhân sự": bs['ID'],
+                "Buổi": "Sáng",
+                "Loại": loai_pk,
+            })
+        for bs in ds_bs_chieu:
+            data_to_sheets.append({
+                "Ngày": ngay_thang_nam,
+                "Thứ": day,
+                "Bác sĩ": bs['TÊN'],
+                "Mã nhân sự": bs['ID'],
+                "Buổi": "Chiều",
+                "Loại": loai_pk,
+            })
 submit = st.button("Gửi đăng ký lịch phòng khám")
 if submit:
-    send_to_gsheet(lich_pk)
+    send_to_gsheet(data_to_sheets)
     st.success("Đã gửi đăng ký lịch phòng khám!")
