@@ -45,25 +45,21 @@ def load_credentials():
     )
 
 def get_sheet3():
-    """Trả về worksheet thứ 3 (index 2) của file output_2 từ secrets. Tạo nếu không tồn tại."""
+    """Trả về worksheet thứ 3 (index 2) của file output_2 từ secrets."""
     credentials = load_credentials()
     gc = gspread.authorize(credentials)
     sheet_name = st.secrets["sheet_name"]["output_2"]
     try:
         sh = gc.open(sheet_name)
     except gspread.exceptions.SpreadsheetNotFound:
-        # Sheet chưa tồn tại → tạo mới
         sh = gc.create(sheet_name)
-        # Thêm 3 worksheet (mặc định có 1)
-        sh.add_worksheet("Sheet2", 1000, 7)
-        sh.add_worksheet("Sheet3", 1000, 7)
-    
-    # Lấy worksheet thứ 3 (index 2)
+        sh.add_worksheet("Sheet2", rows=1, cols=7)
+        sh.add_worksheet("Sheet3", rows=1, cols=7)
+
     ws = sh.get_worksheet(2)
     if ws is None:
-        # Nếu không có worksheet thứ 3, tạo mới
-        ws = sh.add_worksheet("Sheet3", 1000, 7)
-    
+        # Tạo sheet thứ 3 không giới hạn dòng (rows=1, gspread tự mở rộng)
+        ws = sh.add_worksheet("Sheet3", rows=1, cols=7)
     return ws
 
 def load_sheet3_df():
@@ -77,12 +73,10 @@ def load_sheet3_df():
         header = data[0]
         rows = data[1:]
         df = pd.DataFrame(rows, columns=header)
-        # Loại bỏ dòng hoàn toàn trống
         df = df[df["STT"].str.strip() != ""]
         return df
     except Exception as e:
         st.error(f"Lỗi khi đọc dữ liệu từ Google Sheets: {e}")
-        # Trả về DataFrame trống để app không crash
         return pd.DataFrame(columns=["STT", "TIMESTAMP", "NHÂN VIÊN",
                                      "LOẠI (CT/BT)", "NỘI DUNG", "NGÀY", "BUỔI"])
 
@@ -100,9 +94,9 @@ def is_duplicate(df: pd.DataFrame, nhan_vien: str, loai: str,
     existing = df[mask]["BUỔI"].str.strip().tolist()
     for ex in existing:
         if ex == "S - C":
-            return True          # đã đăng ký cả ngày → bất kỳ buổi nào cũng trùng
+            return True
         if buoi == "S - C" and ex in ("S", "C"):
-            return True          # người dùng chọn cả ngày, ngày đó đã có S hoặc C
+            return True
         if ex == buoi:
             return True
     return False
@@ -110,11 +104,11 @@ def is_duplicate(df: pd.DataFrame, nhan_vien: str, loai: str,
 def upload_rows(rows: list[dict]):
     """
     Thêm các dòng mới vào cuối sheet 3.
-    rows: list of dict với keys STT, TIMESTAMP, NHÂN VIÊN, LOẠI (CT/BT), NỘI DUNG, NGÀY, BUỔI
+    Google Sheets tự động mở rộng khi append — không cần giới hạn số dòng.
     """
     ws = get_sheet3()
     existing = ws.get_all_values()
-    next_stt = len(existing)  # dòng header là 1, nên số dòng = STT tiếp theo
+    next_stt = len(existing)  # header = row 1 → STT tiếp theo = số dòng hiện tại
 
     values_to_append = []
     for r in rows:
@@ -129,18 +123,26 @@ def upload_rows(rows: list[dict]):
         ])
         next_stt += 1
 
+    # append_rows tự mở rộng sheet, không cần pre-allocate số dòng
     ws.append_rows(values_to_append, value_input_option="USER_ENTERED")
 
 def update_row(sheet_row_index: int, timestamp: str, loai: str,
                noi_dung: str, ngay: str, buoi: str):
+    """Cập nhật cột B→G tại dòng sheet_row_index (1-based)."""
+    ws = get_sheet3()
+    ws.update(
+        f"B{sheet_row_index}:G{sheet_row_index}",
+        [[timestamp, None, loai, noi_dung, ngay, buoi]],
+        value_input_option="USER_ENTERED"
+    )
+
+def delete_row(sheet_row_index: int):
     """
-    Cập nhật dòng tại vị trí sheet_row_index (1-based, tính cả header).
-    Chỉ cập nhật cột B(2) đến G(7).
+    Xóa hẳn dòng tại sheet_row_index (1-based) khỏi Google Sheet.
+    Các dòng bên dưới sẽ tự động dịch lên — không để lại dòng trống.
     """
     ws = get_sheet3()
-    ws.update(f"B{sheet_row_index}:G{sheet_row_index}",
-              [[timestamp, None, loai, noi_dung, ngay, buoi]],
-              value_input_option="USER_ENTERED")
+    ws.delete_rows(sheet_row_index)
 
 # ======================== HELPER UI ========================
 
@@ -150,13 +152,10 @@ BUOI_MAP      = {"Buổi sáng": "S", "Buổi chiều": "C", "Cả ngày": "S - 
 LOAI_MAP      = {"Công tác": "CT", "Bù trực": "BT"}
 
 def render_block(idx: int, default: dict | None = None):
-    """
-    Render 1 block đăng ký. Trả về dict dữ liệu hoặc None nếu chưa đủ.
-    default: dùng khi chỉnh sửa (prefill giá trị).
-    """
+    """Render 1 block đăng ký. Trả về dict dữ liệu."""
     d = default or {}
     today = date.today()
-    max_date = today + timedelta(days=183)  # ~6 tháng
+    max_date = today + timedelta(days=183)  # 6 tháng
 
     with st.container(border=True):
         st.markdown(f"**Đăng ký #{idx + 1}**")
@@ -177,12 +176,9 @@ def render_block(idx: int, default: dict | None = None):
                                          key=f"noidung_{idx}")
             else:
                 noi_dung = ""
-                st.markdown(" ")  # placeholder spacing
+                st.markdown(" ")
 
-        nhieu_ngay_default = False
-        if d.get("ngay_end"):
-            nhieu_ngay_default = True
-
+        nhieu_ngay_default = bool(d.get("ngay_end"))
         che_do = st.radio("Chế độ đăng ký",
                           ["Đăng ký 1 ngày", "Đăng ký nhiều ngày"],
                           index=1 if nhieu_ngay_default else 0,
@@ -208,16 +204,18 @@ def render_block(idx: int, default: dict | None = None):
             else:
                 start_val = d.get("ngay_start") or today
                 end_val   = d.get("ngay_end") or today
+                for attr, fallback in [(start_val, today), (end_val, today)]:
+                    if isinstance(attr, str):
+                        try:
+                            attr = datetime.strptime(attr, "%d/%m/%Y").date()
+                        except Exception:
+                            attr = fallback
                 if isinstance(start_val, str):
-                    try:
-                        start_val = datetime.strptime(start_val, "%d/%m/%Y").date()
-                    except Exception:
-                        start_val = today
+                    try: start_val = datetime.strptime(start_val, "%d/%m/%Y").date()
+                    except: start_val = today
                 if isinstance(end_val, str):
-                    try:
-                        end_val = datetime.strptime(end_val, "%d/%m/%Y").date()
-                    except Exception:
-                        end_val = today
+                    try: end_val = datetime.strptime(end_val, "%d/%m/%Y").date()
+                    except: end_val = today
 
                 ngay_range = st.date_input("Từ ngày → Đến ngày",
                                             value=(start_val, end_val),
@@ -260,18 +258,15 @@ def render_block(idx: int, default: dict | None = None):
 def tab_dang_ky(nhan_vien: str):
     st.subheader("📝 Đăng ký lịch công tác / bù trực")
 
-    # Khởi tạo session state
     if "blocks" not in st.session_state:
         st.session_state.blocks = [{}]
-    if "submitted" not in st.session_state:
-        st.session_state.submitted = False
 
     block_data = []
     for i, default in enumerate(st.session_state.blocks):
         data = render_block(i, default)
         block_data.append(data)
 
-    col_add, col_send = st.columns([1, 1])
+    col_add, col_send = st.columns(2)
 
     with col_add:
         if st.button("➕ Thêm khác", use_container_width=True):
@@ -280,7 +275,6 @@ def tab_dang_ky(nhan_vien: str):
 
     with col_send:
         if st.button("✅ Gửi đăng ký", type="primary", use_container_width=True):
-            # Validate & chuẩn bị dữ liệu
             df_existing = load_sheet3_df()
             rows_to_upload = []
             has_error = False
@@ -298,14 +292,10 @@ def tab_dang_ky(nhan_vien: str):
                 for ngay in bd["ngay_list"]:
                     ngay_str = ngay.strftime("%d/%m/%Y")
                     loai_full = "Công tác" if bd["loai"] == "CT" else "Bù trực"
-                    if is_duplicate(df_existing, nhan_vien,
-                                    bd["loai"], ngay_str, bd["buoi"]):
-                        st.error(
-                            f"⚠️ Bạn đã đăng ký lịch {loai_full} vào ngày {ngay_str} rồi !"
-                        )
+                    if is_duplicate(df_existing, nhan_vien, bd["loai"], ngay_str, bd["buoi"]):
+                        st.error(f"⚠️ Bạn đã đăng ký lịch {loai_full} vào ngày {ngay_str} rồi !")
                         has_error = True
                         break
-
                     rows_to_upload.append({
                         "TIMESTAMP": datetime.now(VN_TZ).strftime("%d/%m/%Y %H:%M:%S"),
                         "NHÂN VIÊN": nhan_vien,
@@ -320,7 +310,6 @@ def tab_dang_ky(nhan_vien: str):
             if not has_error and rows_to_upload:
                 try:
                     upload_rows(rows_to_upload)
-                    st.session_state.submitted = True
                     st.session_state.blocks = [{}]
                     st.success(f"✅ Đã gửi {len(rows_to_upload)} dòng đăng ký thành công!")
                     st.balloons()
@@ -332,30 +321,26 @@ def tab_xem_lich(nhan_vien: str):
     st.subheader("📅 Xem lịch đã đăng ký")
 
     today = date.today()
-    min_date_view = today - timedelta(days=90)   # 3 tháng trước
-    max_date_view = today + timedelta(days=183)  # 6 tháng sau
+    min_date_view = today - timedelta(days=90)
+    max_date_view = today + timedelta(days=183)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        from_date = st.date_input("Từ ngày",
-                                   value=today,
-                                   min_value=min_date_view,
-                                   max_value=max_date_view,
-                                   key="view_from",
-                                   format="DD/MM/YYYY")
-    with col2:
-        to_date = st.date_input("Đến ngày",
-                                 value=today + timedelta(days=30),
-                                 min_value=min_date_view,
-                                 max_value=max_date_view,
-                                 key="view_to",
-                                 format="DD/MM/YYYY")
-    with col3:
-        loai_xem = st.selectbox("Loại đăng ký",
-                                 ["Tất cả", "Công tác (CT)", "Bù trực (BT)"],
-                                 key="view_loai")
+    with st.form("form_xem_lich"):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            from_date = st.date_input("Từ ngày", value=today,
+                                       min_value=min_date_view, max_value=max_date_view,
+                                       key="view_from", format="DD/MM/YYYY")
+        with col2:
+            to_date = st.date_input("Đến ngày", value=today + timedelta(days=30),
+                                     min_value=min_date_view, max_value=max_date_view,
+                                     key="view_to", format="DD/MM/YYYY")
+        with col3:
+            loai_xem = st.selectbox("Loại đăng ký",
+                                     ["Tất cả", "Công tác (CT)", "Bù trực (BT)"],
+                                     key="view_loai")
+        submitted = st.form_submit_button("🔍 OK", type="primary")
 
-    if st.button("🔍 OK", type="primary"):
+    if submitted:
         if from_date > to_date:
             st.error("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.")
             return
@@ -365,16 +350,13 @@ def tab_xem_lich(nhan_vien: str):
             st.info("Không có dữ liệu theo yêu cầu.")
             return
 
-        # Lọc theo nhân viên
         df = df[df["NHÂN VIÊN"].str.strip() == nhan_vien]
 
-        # Lọc theo loại
         if loai_xem == "Công tác (CT)":
             df = df[df["LOẠI (CT/BT)"].str.strip() == "CT"]
         elif loai_xem == "Bù trực (BT)":
             df = df[df["LOẠI (CT/BT)"].str.strip() == "BT"]
 
-        # Parse ngày để lọc khoảng
         def parse_ngay(s):
             try:
                 return datetime.strptime(s.strip(), "%d/%m/%Y").date()
@@ -389,23 +371,20 @@ def tab_xem_lich(nhan_vien: str):
             st.info("Không có dữ liệu theo yêu cầu.")
             return
 
-        # Lưu vào session state để render bảng
         st.session_state["view_df"] = df.reset_index(drop=True)
         st.session_state["edit_row_idx"] = None
+        st.session_state["confirm_delete_idx"] = None
 
-    # Render bảng kết quả
-    if "view_df" in st.session_state and st.session_state["view_df"] is not None:
+    # ── Render bảng kết quả ──────────────────────────────────────
+    if st.session_state.get("view_df") is not None:
         df_show = st.session_state["view_df"]
-
         st.markdown(f"**Tìm thấy {len(df_show)} kết quả:**")
-        
+
         cutoff_edit = date.today() - timedelta(days=7)
 
-        # Header bảng
         hcols = st.columns([2, 2, 1.5, 2.5, 1.8, 1.2, 1.5])
-        headers = ["Thời gian ĐK", "Tên nhân viên", "Loại ĐK",
-                   "Nội dung", "Ngày ĐK", "Buổi", ""]
-        for hc, ht in zip(hcols, headers):
+        for hc, ht in zip(hcols, ["Thời gian ĐK", "Tên nhân viên", "Loại ĐK",
+                                    "Nội dung", "Ngày ĐK", "Buổi", ""]):
             hc.markdown(f"**{ht}**")
         st.divider()
 
@@ -419,45 +398,42 @@ def tab_xem_lich(nhan_vien: str):
             rcols[4].write(row.get("NGÀY", ""))
             rcols[5].write(row.get("BUỔI", ""))
 
-            # Xác định nút chỉnh sửa có hoạt động không
             ngay_dk = row.get("_ngay_dt")
             can_edit = (ngay_dk is not None) and (ngay_dk > cutoff_edit)
 
             if rcols[6].button("✏️ Sửa", key=f"edit_btn_{i}",
-                               disabled=not can_edit,
-                               use_container_width=True):
+                               disabled=not can_edit, use_container_width=True):
                 st.session_state["edit_row_idx"] = i
                 st.session_state["edit_row_data"] = row.to_dict()
+                st.session_state["confirm_delete_idx"] = None
                 st.rerun()
 
         st.divider()
 
-        # Form chỉnh sửa
+        # ── Panel chỉnh sửa ──────────────────────────────────────
         if st.session_state.get("edit_row_idx") is not None:
-            edit_idx = st.session_state["edit_row_idx"]
-            edit_row = st.session_state["edit_row_data"]
+            edit_idx  = st.session_state["edit_row_idx"]
+            edit_row  = st.session_state["edit_row_data"]
 
             st.markdown(f"### ✏️ Chỉnh sửa dòng #{edit_idx + 1}")
 
-            # Chuẩn bị default cho render_block
-            inv_loai = {"CT": "Công tác", "BT": "Bù trực"}
-            inv_buoi = {"S": "Buổi sáng", "C": "Buổi chiều", "S - C": "Cả ngày"}
             try:
                 ngay_dt = datetime.strptime(edit_row.get("NGÀY", ""), "%d/%m/%Y").date()
             except Exception:
                 ngay_dt = date.today()
 
             default_edit = {
-                "loai": edit_row.get("LOẠI (CT/BT)", "CT"),
-                "noi_dung": edit_row.get("NỘI DUNG", ""),
+                "loai":       edit_row.get("LOẠI (CT/BT)", "CT"),
+                "noi_dung":   edit_row.get("NỘI DUNG", ""),
                 "ngay_start": ngay_dt,
-                "ngay_end": None,
-                "buoi": edit_row.get("BUỔI", "S"),
+                "ngay_end":   None,
+                "buoi":       edit_row.get("BUỔI", "S"),
             }
-
             edit_data = render_block(9999, default=default_edit)
 
-            col_save, col_cancel = st.columns(2)
+            col_save, col_cancel, col_delete = st.columns(3)
+
+            # Nút Lưu thay đổi
             with col_save:
                 if st.button("💾 Lưu thay đổi", type="primary", use_container_width=True):
                     if not edit_data["ngay_list"]:
@@ -465,39 +441,68 @@ def tab_xem_lich(nhan_vien: str):
                     elif edit_data["loai"] == "CT" and not edit_data["noi_dung"].strip():
                         st.error("Vui lòng nhập Diễn giải.")
                     else:
-                        # Tìm dòng thực trên sheet (STT + 2 vì header ở row 1, data từ row 2)
                         try:
-                            stt_val = int(edit_row.get("STT", 0))
-                            sheet_row = stt_val + 1  # STT bắt đầu từ 1 → row index = STT + 1
+                            stt_val   = int(edit_row.get("STT", 0))
+                            sheet_row = stt_val + 1  # STT bắt đầu từ 1, header ở row 1
                         except Exception:
                             sheet_row = None
 
                         if sheet_row:
-                            new_ts = datetime.now(VN_TZ).strftime("%d/%m/%Y %H:%M:%S")
+                            new_ts   = datetime.now(VN_TZ).strftime("%d/%m/%Y %H:%M:%S")
                             new_ngay = edit_data["ngay_list"][0].strftime("%d/%m/%Y")
                             try:
-                                update_row(
-                                    sheet_row_index=sheet_row,
-                                    timestamp=new_ts,
-                                    loai=edit_data["loai"],
-                                    noi_dung=edit_data["noi_dung"],
-                                    ngay=new_ngay,
-                                    buoi=edit_data["buoi"],
-                                )
+                                update_row(sheet_row, new_ts, edit_data["loai"],
+                                           edit_data["noi_dung"], new_ngay, edit_data["buoi"])
                                 st.success("✅ Đã lưu thay đổi thành công!")
                                 st.session_state["edit_row_idx"] = None
                                 st.session_state["view_df"] = None
+                                st.session_state["confirm_delete_idx"] = None
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Lỗi khi cập nhật: {e}")
                         else:
                             st.error("Không xác định được dòng cần cập nhật.")
 
-            with col_cancel:
-                if st.button("❌ Hủy", use_container_width=True):
-                    st.session_state["edit_row_idx"] = None
+            # Nút Hủy đăng ký (xóa dòng)
+            with col_delete:
+                if st.button("🗑️ Hủy đăng ký", use_container_width=True):
+                    st.session_state["confirm_delete_idx"] = edit_idx
                     st.rerun()
 
+
+            # ── Xác nhận xóa ────────────────────────────────────
+            if st.session_state.get("confirm_delete_idx") == edit_idx:
+                loai_full = "Công tác" if edit_row.get("LOẠI (CT/BT)") == "CT" else "Bù trực"
+                st.warning(
+                    f"⚠️ Bạn có chắc muốn **hủy đăng ký** lịch **{loai_full}** "
+                    f"ngày **{edit_row.get('NGÀY', '')}** buổi **{edit_row.get('BUỔI', '')}** không? "
+                    f"Thao tác này **không thể hoàn tác**."
+                )
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button("✅ Xác nhận hủy", type="primary", use_container_width=True):
+                        try:
+                            stt_val   = int(edit_row.get("STT", 0))
+                            sheet_row = stt_val + 1
+                            delete_row(sheet_row)
+                            st.success("✅ Đã hủy đăng ký thành công!")
+                            st.session_state["edit_row_idx"] = None
+                            st.session_state["view_df"] = None
+                            st.session_state["confirm_delete_idx"] = None
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Lỗi khi xóa dữ liệu: {e}")
+                with c2:
+                    if st.button("↩️ Quay lại", use_container_width=True):
+                        st.session_state["confirm_delete_idx"] = None
+                        st.rerun()
+
+                            # Nút Hủy (đóng panel)
+            with col_cancel:
+                if st.button("❌ Đóng chỉnh sửa", use_container_width=True):
+                    st.session_state["edit_row_idx"] = None
+                    st.session_state["confirm_delete_idx"] = None
+                    st.rerun()
 
 # ======================== MAIN ========================
 
@@ -523,11 +528,9 @@ st.markdown(f"""
 nhan_vien = st.session_state.get("username", "Không xác định")
 st.html(f'<p class="demuc"><i>Bác sĩ đang thực hiện: {nhan_vien}</i></p>')
 
-# Khởi tạo các session state cần thiết
-if "edit_row_idx" not in st.session_state:
-    st.session_state["edit_row_idx"] = None
-if "view_df" not in st.session_state:
-    st.session_state["view_df"] = None
+for key in ["edit_row_idx", "view_df", "confirm_delete_idx"]:
+    if key not in st.session_state:
+        st.session_state[key] = None
 
 tab1, tab2 = st.tabs(["📝 Đăng ký lịch công tác / bù trực", "📅 Xem lịch đã đăng ký"])
 

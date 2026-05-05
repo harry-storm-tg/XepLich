@@ -62,7 +62,7 @@ st.markdown(f"""
             </div>
         </div>
         <div class="header-subtext">
-            <p>ĐĂNG KÝ LỊCH HỌC</p>
+            <p>THIẾT KẾ LỊCH LÀM VIỆC</p>
         </div>
     </div>
     <div class="header-underline"></div>

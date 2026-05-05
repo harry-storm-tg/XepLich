@@ -78,11 +78,14 @@ login_page = st.Page(login, title="Sign in", icon=":material/login:")
 logout_page = st.Page(logout, title="Sign out", icon=":material/logout:")
 
 TK = st.Page("users/TaiKhoan.py", title="Tài khoản", icon="🔸", default=True)
-LT = st.Page("pages/LichTruc.py", title="Lịch trực", icon="🔸")
+LT = st.Page("pages/DK_LichTruc.py", title="Lịch trực", icon="🔸")
 CT = st.Page("pages/DK_CongTac.py", title="Đăng ký công tác", icon="🔸")
 VT = st.Page("pages/DS_ViTri.py", title="Danh sách vị trí", icon="🔸")
 P = st.Page("pages/DK_Phep.py", title="Đăng ký phép", icon="🔸")
 H = st.Page("pages/DK_Hoc.py", title="Đăng ký học", icon="🔸")
+
+DP = st.Page("reports/DuyetPhep.py", title="Duyệt phép", icon="🔸")
+LLV = st.Page("reports/LichLamViec.py", title="Xếp lịch làm việc", icon="🔸")
 
 if "username" in st.session_state:
     if st.session_state.auth == "1":
@@ -90,6 +93,7 @@ if "username" in st.session_state:
             {
                 "Thông tin tài khoản": [ logout_page, TK],
                 "Chuyên mục": [ LT, CT, VT, P, H ],
+                "Duyệt": [ DP, LLV ],
             },
         expanded=False,
         )
