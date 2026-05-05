@@ -86,13 +86,14 @@ H = st.Page("pages/DK_Hoc.py", title="Đăng ký học", icon="🔸")
 
 DP = st.Page("reports/DuyetPhep.py", title="Duyệt phép", icon="🔸")
 LLV = st.Page("reports/LichLamViec.py", title="Xếp lịch làm việc", icon="🔸")
+PK = st.Page("pages/DK_Lich_PK.py", title="Đăng ký phòng khám", icon="🔸")
 
 if "username" in st.session_state:
     if st.session_state.auth == "1":
         pg = st.navigation(
             {
                 "Thông tin tài khoản": [ logout_page, TK],
-                "Chuyên mục": [ LT, CT, VT, P, H ],
+                "Chuyên mục": [ LT, CT, VT, P, H, PK ],
                 "Duyệt": [ DP, LLV ],
             },
         expanded=False,
