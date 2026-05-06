@@ -146,10 +146,10 @@ def delete_row(sheet_row_index: int):
 
 # ======================== HELPER UI ========================
 
-LOAI_OPTIONS = ["Công tác", "Bù trực"]
+LOAI_OPTIONS = ["Công tác", "Bù trực", "Kế hoạch"]
 BUOI_OPTIONS  = ["Buổi sáng", "Buổi chiều", "Cả ngày"]
 BUOI_MAP      = {"Buổi sáng": "S", "Buổi chiều": "C", "Cả ngày": "S - C"}
-LOAI_MAP      = {"Công tác": "CT", "Bù trực": "BT"}
+LOAI_MAP      = {"Công tác": "CT", "Bù trực": "BT", "Kế hoạch": "KH"}
 
 def render_block(idx: int, default: dict | None = None):
     """Render 1 block đăng ký. Trả về dict dữ liệu."""
@@ -336,7 +336,7 @@ def tab_xem_lich(nhan_vien: str):
                                      key="view_to", format="DD/MM/YYYY")
         with col3:
             loai_xem = st.selectbox("Loại đăng ký",
-                                     ["Tất cả", "Công tác (CT)", "Bù trực (BT)"],
+                                     ["Tất cả", "Công tác (CT)", "Bù trực (BT)","Kế hoạch (KH)"],
                                      key="view_loai")
         submitted = st.form_submit_button("🔍 OK", type="primary")
 
@@ -356,6 +356,8 @@ def tab_xem_lich(nhan_vien: str):
             df = df[df["LOẠI (CT/BT)"].str.strip() == "CT"]
         elif loai_xem == "Bù trực (BT)":
             df = df[df["LOẠI (CT/BT)"].str.strip() == "BT"]
+        elif loai_xem == "Kế hoạch (KH)":
+            df = df[df["LOẠI (CT/BT)"].str.strip() == "KH"]
 
         def parse_ngay(s):
             try:

@@ -86,6 +86,7 @@ H = st.Page("pages/DK_Hoc.py", title="Đăng ký học", icon="🔸")
 DP = st.Page("reports/DuyetPhep.py", title="Duyệt phép", icon="🔸")
 LLV = st.Page("reports/LichLamViec.py", title="Xếp lịch làm việc", icon="🔸")
 PK = st.Page("pages/DK_Lich_PK.py", title="Đăng ký phòng khám", icon="🔸")
+Test = st.Page("reports/Test.py", title="Test", icon="🔸")
 
 if "username" in st.session_state:
     if st.session_state.auth == "1":
@@ -94,6 +95,7 @@ if "username" in st.session_state:
                 "Thông tin tài khoản": [ logout_page, TK],
                 "Chuyên mục": [ LT, CT, VT, P, H, PK ],
                 "Duyệt": [ DP, LLV ],
+                "Test": [ Test ],
             },
         expanded=False,
         )
