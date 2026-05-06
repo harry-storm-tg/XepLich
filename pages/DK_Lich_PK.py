@@ -188,8 +188,7 @@ with tab1:
     if not all_weeks:
         st.warning("Không có tuần nào trong khoảng thời gian đã chọn.")
         st.stop()
-
-    ds_pk = list(st.secrets["PK"].values()) if "PK" in st.secrets else ["PK Tân Bình", "PK Ngọc Lan", "PK Quốc Ánh"]
+    ds_pk = list(dict(st.secrets["PK"]).values())
     days_vn = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
     sessions = [("S", "☀️ Sáng"), ("C", "🌙 Chiều"), ("T", "🌃 Tối")]
 
