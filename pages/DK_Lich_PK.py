@@ -165,15 +165,13 @@ if pathlib.Path(logo_path).exists():
 
 nhan_vien = st.session_state.get("username", "Không xác định")
 st.markdown(f'<p style="font-style:italic; color:#555;">Bác sĩ đang thực hiện: {nhan_vien}</p>', unsafe_allow_html=True)
-st.title("🏥 Hệ thống Đăng ký Lịch phòng khám")
+st.title("🏥 Đăng ký Lịch phòng khám")
 
 # ======================== TABS ========================
 tab1, tab2 = st.tabs(["📅 Gán lịch phòng khám", "✏️ Thay đổi lịch phòng khám"])
 
 # ======================== TAB 1 ========================
 with tab1:
-    st.subheader("Gán lịch phòng khám")
-
     col_range = st.columns(2)
     with col_range[0]:
         tu_ngay = st.date_input("Từ ngày", value=datetime.now().date(), format="DD/MM/YYYY", key="tab1_tu_ngay")
@@ -197,7 +195,7 @@ with tab1:
     mau_saturday = mau_monday + timedelta(days=5)
 
     st.info(f"**Tuần mẫu (Tuần {mau_week_num}):** Từ {mau_monday.strftime('%d/%m/%Y')} đến {mau_saturday.strftime('%d/%m/%Y')} — Nhập lịch tuần mẫu, hệ thống sẽ tự động sao chép sang các tuần còn lại.")
-
+    
     # --- Tuần mẫu ---
     mau_data = {}
     for loai_pk in ds_pk:
@@ -261,7 +259,7 @@ with tab1:
 
     # --- Nút lưu ---
     st.markdown("---")
-    if st.button("💾 Lưu lịch phòng khám", type="primary"):
+    if st.button("💾 Lưu lịch phòng khám cho các tuần còn lại", week_num, type="primary"):
         data_to_sheets = []
 
         for week_monday in all_weeks:
@@ -301,8 +299,6 @@ with tab1:
 
 # ======================== TAB 2 ========================
 with tab2:
-    st.subheader("Thay đổi lịch phòng khám")
-
     # ---- FORM LỌC ----
     with st.form("filter_form"):
         st.markdown("#### 🔍 Bộ lọc dữ liệu")
